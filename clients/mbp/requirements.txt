@@ -1,0 +1,6 @@
+openwakeword
+pyaudio
+numpy
+requests
+flask
+python-dotenv
