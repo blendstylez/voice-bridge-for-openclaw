@@ -7,9 +7,9 @@ Flow: [LISTENING] → wake word → [RECORDING] → silence/max → [UPLOADED] �
 Reply arrives later via playback_server.py (POST /play from the bridge).
 
 Requires a .env file in the same directory with:
-    BRIDGE_URL=http://<mac-mini-lan-ip>:18790/voice
-    BRIDGE_AUTH_TOKEN=<shared-secret>
-    SOURCE_ID=mbp-dev
+    OPENCLAW_WEBHOOK_URL=http://<mac-mini-lan-ip>:18790/voice
+    OPENCLAW_BEARER_TOKEN=<shared-secret>
+    CLIENT_SOURCE_NAME=mbp-dev
 """
 
 import os
@@ -52,12 +52,12 @@ TEMP_DIR            = "/tmp/jarvis"   # debug WAV files land here
 # ---------------------------------------------------------------------------
 load_dotenv()
 
-WEBHOOK_URL   = os.getenv("BRIDGE_URL")
-BEARER_TOKEN  = os.getenv("BRIDGE_AUTH_TOKEN")
-SOURCE_NAME   = os.getenv("SOURCE_ID", "mbp-dev")
+WEBHOOK_URL   = os.getenv("OPENCLAW_WEBHOOK_URL")
+BEARER_TOKEN  = os.getenv("OPENCLAW_BEARER_TOKEN")
+SOURCE_NAME   = os.getenv("CLIENT_SOURCE_NAME", "mbp-dev")
 
 if not WEBHOOK_URL or not BEARER_TOKEN:
-    print("[ERROR] BRIDGE_URL and BRIDGE_AUTH_TOKEN must be set in .env")
+    print("[ERROR] OPENCLAW_WEBHOOK_URL and OPENCLAW_BEARER_TOKEN must be set in .env")
     sys.exit(1)
 
 os.makedirs(TEMP_DIR, exist_ok=True)

@@ -5,7 +5,7 @@ playback_server.py — Jarvis Voice Loop: Client Playback Server (Pi)
 Receives TTS audio (WAV) from the bridge and plays it via aplay.
 
 POST /play
-  Authorization: Bearer <CLIENT_PLAYBACK_TOKEN>
+  Authorization: Bearer <PLAYBACK_BEARER_TOKEN>
   Content-Type: audio/wav  (raw bytes)
               OR multipart/form-data with `audio` field
   → 200 {"status":"playing"}
@@ -23,13 +23,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PLAYBACK_BEARER_TOKEN = os.getenv("CLIENT_PLAYBACK_TOKEN")
+PLAYBACK_BEARER_TOKEN = os.getenv("PLAYBACK_BEARER_TOKEN")
 PLAYBACK_PORT = int(os.getenv("PLAYBACK_PORT", "18780"))
 ALSA_DEVICE = os.getenv("ALSA_PLAYBACK_DEVICE", "plughw:3,0")
 TEMP_DIR = "/tmp/jarvis"
 
 if not PLAYBACK_BEARER_TOKEN:
-    print("[ERROR] CLIENT_PLAYBACK_TOKEN must be set in .env")
+    print("[ERROR] PLAYBACK_BEARER_TOKEN must be set in .env")
     sys.exit(1)
 
 os.makedirs(TEMP_DIR, exist_ok=True)

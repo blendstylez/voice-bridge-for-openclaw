@@ -7,9 +7,9 @@ Flow: [LISTENING] → wake word → [RECORDING] → silence/max → [UPLOADED] �
 Reply arrives later via playback_server.py (POST /play from the bridge).
 
 Requires a .env file in the same directory with:
-    BRIDGE_URL=http://<mac-mini-lan-ip>:18790/voice
-    BRIDGE_AUTH_TOKEN=<shared-secret>
-    SOURCE_ID=pi-livingroom
+    OPENCLAW_WEBHOOK_URL=http://<mac-mini-lan-ip>:18790/voice
+    OPENCLAW_BEARER_TOKEN=<shared-secret>
+    CLIENT_SOURCE_NAME=pi-livingroom
     INPUT_DEVICE_INDEX=<pyaudio index of USB mic>
 
 Pi note: USB mic is opened at its native rate (48kHz, stereo).
@@ -62,13 +62,13 @@ TEMP_DIR            = "/tmp/jarvis"
 # ---------------------------------------------------------------------------
 load_dotenv()
 
-WEBHOOK_URL        = os.getenv("BRIDGE_URL")
-BEARER_TOKEN       = os.getenv("BRIDGE_AUTH_TOKEN")
-SOURCE_NAME        = os.getenv("SOURCE_ID", "pi-livingroom")
+WEBHOOK_URL        = os.getenv("OPENCLAW_WEBHOOK_URL")
+BEARER_TOKEN       = os.getenv("OPENCLAW_BEARER_TOKEN")
+SOURCE_NAME        = os.getenv("CLIENT_SOURCE_NAME", "pi-livingroom")
 INPUT_DEVICE_INDEX = int(os.getenv("INPUT_DEVICE_INDEX", "-1"))
 
 if not WEBHOOK_URL or not BEARER_TOKEN:
-    print("[ERROR] BRIDGE_URL and BRIDGE_AUTH_TOKEN must be set in .env")
+    print("[ERROR] OPENCLAW_WEBHOOK_URL and OPENCLAW_BEARER_TOKEN must be set in .env")
     sys.exit(1)
 
 os.makedirs(TEMP_DIR, exist_ok=True)
