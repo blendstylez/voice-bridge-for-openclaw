@@ -83,7 +83,7 @@ Client Pi  (<pi-lan-ip>)  ─┘        Returns 202 Accepted immediately
 ### 3.1 Voice Bridge (Mac mini)
 
 **File:** `<project-root>/projects/Jarvis-remote-endpoint/voice_bridge.py`  
-**Host:** Mac mini (<mac-mini-hostname>, Tailscale: `<mac-mini-tailscale-ip>`, LAN: `<mac-mini-lan-ip>`)  
+**Host:** Mac mini (Tailscale: `<mac-mini-tailscale-ip>`, LAN: `<mac-mini-lan-ip>`)  
 **Port:** `18790`  
 **WSGI Server:** Waitress (4 threads), fallback to Flask dev server  
 **LaunchAgent:** `ai.openclaw.voice-bridge`  
@@ -112,7 +112,7 @@ waitress
 ### 3.2 Voice Client (MBP)
 
 **File:** `<project-root>/Projects/openWakeWorld/openWakeWord/jarvis_voice_client.py`  
-**Host:** MacBook Pro (<mbp-hostname>, Tailscale: `<mbp-tailscale-ip>`, LAN: `<mbp-lan-ip>`)  
+**Host:** MacBook Pro (Tailscale: `<mbp-tailscale-ip>`, LAN: `<mbp-lan-ip>`)  
 **Version:** async v2 (updated 2026-04-13)  
 **Python venv:** `<project-root>/Projects/openWakeWorld/openWakeWord/venv/` (Python 3.9)  
 **Built by:** Claude Code
@@ -1208,67 +1208,48 @@ curl -X POST http://<mac-mini-lan-ip>:18790/voice \
 
 ## 16. MBP Aliases for Pi Maintenance
 
-Add to `~/.zshrc` on the MBP, then `source ~/.zshrc`.
+A set of convenience aliases and functions for monitoring and controlling the
+Pi services from the MBP. They wrap common SSH + systemctl + curl + alsamixer
+workflows into short commands.
 
-```bash
-# ── Jarvis Pi: Logs ────────────────────────────────────────────────────────
-# Voice-Client live: Wake, Recording, Upload, Cooldown
-alias <pi-hostname>-log="ssh <pi-hostname> 'tail -n 100 -f <project-root>/jarvis-voice/logs/voice-client.log'"
+**File:** [`clients/mbp/aliases.zsh.example`](../clients/mbp/aliases.zsh.example)
 
-# Playback-Server live: wann kommt die Antwort an
-alias <pi-hostname>-play-log="ssh <pi-hostname> 'tail -n 50 -f <project-root>/jarvis-voice/logs/playback.log'"
+### Installation
 
-# Beide gleichzeitig (==> Dateiname <== als Trennlinie)
-alias <pi-hostname>-logs="ssh <pi-hostname> 'tail -n 50 -f <project-root>/jarvis-voice/logs/voice-client.log <project-root>/jarvis-voice/logs/playback.log'"
+1. Copy the file to your dotfiles location, e.g. `~/.config/zsh/pi-aliases.zsh`
+2. Edit three placeholders in the file:
+   - `<pi-hostname>` → your SSH hostname/alias for the Pi
+   - `<pi-lan-ip>` → your Pi's LAN IP
+   - `<project-root>` → project path on the Pi (typically `/home/<user>/jarvis-voice`)
+3. Source from your `~/.zshrc`:
+   ```zsh
+   source ~/.config/zsh/pi-aliases.zsh
+   ```
+4. Open a new shell or run `source ~/.zshrc`
 
-# Nur echte Fehler — ALSA-Rauschen rausgefiltert
-alias <pi-hostname>-errors="ssh <pi-hostname> \"grep -v 'ALSA\|jack\|Cannot connect\|JackShm\|DiscoverDevice\|GPU device\|drm\|sys/class' <project-root>/jarvis-voice/logs/voice-client.err | tail -30\""
+### Quick Reference
 
-# ── Jarvis Pi: Status & Kontrolle ─────────────────────────────────────────
-# Status beider Services
-alias <pi-hostname>-status="ssh <pi-hostname> 'systemctl --user status jarvis-playback.service jarvis-voice-client.service --no-pager'"
-
-# Health-Check vom MBP aus
-alias <pi-hostname>-health="curl -s http://<pi-lan-ip>:18780/health | python3 -m json.tool"
-
-# Voice-Client neu starten (nach Code- oder .env-Änderung)
-alias <pi-hostname>-restart="ssh <pi-hostname> 'systemctl --user restart jarvis-voice-client.service && echo restarted'"
-
-# Beide Services neu starten
-alias <pi-hostname>-restart-all="ssh <pi-hostname> 'systemctl --user restart jarvis-playback.service jarvis-voice-client.service && echo both restarted'"
-
-# ── Jarvis Pi: Audio ───────────────────────────────────────────────────────
-# Lautstärke interaktiv (Pfeiltasten hoch/runter, ESC beenden)
-alias <pi-hostname>-vol="ssh -t <pi-hostname> 'alsamixer -c 3'"
-
-# Lautstärke direkt setzen: <pi-hostname>-setvol 70%
-# Als Funktion — alias kann $1 nicht durch Single-Quotes durchreichen
-<pi-hostname>-setvol() { ssh <pi-hostname> "amixer -c 3 sset Speaker $1"; }
-
-# ── Jarvis Pi: Housekeeping ────────────────────────────────────────────────
-# Temp-WAVs aufräumen (akkumulieren in /tmp/jarvis/)
-alias <pi-hostname>-clean="ssh <pi-hostname> 'rm -f /tmp/jarvis/*.wav && echo cleaned'"
-
-# Logs leeren (werden endlos angehängt — gelegentlich rotieren)
-alias <pi-hostname>-cleanlogs="ssh <pi-hostname> '> <project-root>/jarvis-voice/logs/voice-client.log; > <project-root>/jarvis-voice/logs/voice-client.err; > <project-root>/jarvis-voice/logs/playback.log; > <project-root>/jarvis-voice/logs/playback.err; echo logs cleared'"
-```
-
-**Quick Reference:**
-
-| Alias | Wann benutzen |
+| Alias | Purpose |
 |---|---|
-| `<pi-hostname>-log` | Live mitlesen ob Wake-Word erkannt wird |
-| `<pi-hostname>-logs` | Wake + Playback gleichzeitig beobachten |
-| `<pi-hostname>-errors` | Nach einem Bug — echte Fehler ohne ALSA-Rauschen |
-| `<pi-hostname>-status` | Nach Reboot prüfen ob beide Services laufen |
-| `<pi-hostname>-health` | Schnell-Check ob Playback-Server erreichbar |
-| `<pi-hostname>-restart` | Nach Änderung an `voice_client.py` oder `.env` |
-| `<pi-hostname>-restart-all` | Nach Änderung an `playback_server.py` |
-| `<pi-hostname>-vol` | Lautstärke zu laut oder zu leise |
-| `<pi-hostname>-setvol 60%` | Lautstärke direkt auf Wert setzen |
-| `<pi-hostname>-clean` | `/tmp/jarvis/` wächst (WAVs akkumulieren) |
-| `<pi-hostname>-cleanlogs` | Logs sind zu groß geworden |
+| `pi-log` | Live tail voice-client log (wake, recording, upload, cooldown) |
+| `pi-play-log` | Live tail playback-server log |
+| `pi-logs` | Both voice-client and playback logs simultaneously |
+| `pi-errors` | Errors only — ALSA noise filtered out |
+| `pi-status` | systemctl status of both Pi services |
+| `pi-health` | HTTP health check on Pi playback server |
+| `pi-restart` | Restart voice-client service (after code/.env change) |
+| `pi-restart-all` | Restart both services |
+| `pi-vol` | Interactive volume control (alsamixer) |
+| `pi-setvol 70%` | Set speaker volume directly |
+| `pi-clean` | Remove accumulated temp WAVs in `/tmp/jarvis/` |
+| `pi-cleanlogs` | Truncate all four Pi log files |
 
----
+### Notes
 
-*Documentation maintained jointly by Jarvis (Mac mini / Bridge side) and Claude Code (MBP + Pi / Client + Playback side). Last full review: 2026-04-15.*
+- The `pi-` prefix is a convention. Rename freely if you want to run multiple
+  Pis or prefer different names.
+- The `pi-setvol` helper is a shell function (not an alias) because aliases
+  can't pass positional arguments through single-quoted SSH commands.
+- All aliases assume passwordless SSH to the Pi (SSH key auth). Set this up
+  first: `ssh-copy-id <pi-hostname>`.
+
