@@ -1,0 +1,53 @@
+# Pi Maintenance Aliases for voice-bridge-for-openclaw
+#
+# Usage:
+#   1. Copy this file to your dotfiles location (e.g. ~/.config/zsh/pi-aliases.zsh)
+#   2. Replace <pi-hostname> with your actual Pi SSH hostname/alias
+#   3. Replace <pi-lan-ip> with your Pi's LAN IP
+#   4. Replace <project-root> with the project path on your Pi (typically
+#      /home/<user>/jarvis-voice)
+#   5. Source it from your ~/.zshrc:  source ~/.config/zsh/pi-aliases.zsh
+#
+# The `pi-` prefix in alias names is a convention — rename freely if you
+# prefer different names or want to run multiple Pis.
+
+# ── Jarvis Pi: Logs ────────────────────────────────────────────────────────
+# Voice client live: wake, recording, upload, cooldown
+alias pi-log="ssh <pi-hostname> 'tail -n 100 -f <project-root>/logs/voice-client.log'"
+
+# Playback server live: when the reply arrives
+alias pi-play-log="ssh <pi-hostname> 'tail -n 50 -f <project-root>/logs/playback.log'"
+
+# Both at once (==> filename <== as separator)
+alias pi-logs="ssh <pi-hostname> 'tail -n 50 -f <project-root>/logs/voice-client.log <project-root>/logs/playback.log'"
+
+# Real errors only — ALSA noise filtered out
+alias pi-errors="ssh <pi-hostname> \"grep -v 'ALSA\|jack\|Cannot connect\|JackShm\|DiscoverDevice\|GPU device\|drm\|sys/class' <project-root>/logs/voice-client.err | tail -30\""
+
+# ── Jarvis Pi: Status & Control ──────────────────────────────────────────
+# Status of both services
+alias pi-status="ssh <pi-hostname> 'systemctl --user status jarvis-playback.service jarvis-voice-client.service --no-pager'"
+
+# Health check from the MBP
+alias pi-health="curl -s http://<pi-lan-ip>:18780/health | python3 -m json.tool"
+
+# Restart voice client (after code or .env change)
+alias pi-restart="ssh <pi-hostname> 'systemctl --user restart jarvis-voice-client.service && echo restarted'"
+
+# Restart both services
+alias pi-restart-all="ssh <pi-hostname> 'systemctl --user restart jarvis-playback.service jarvis-voice-client.service && echo both restarted'"
+
+# ── Jarvis Pi: Audio ───────────────────────────────────────────────────────
+# Interactive volume control (arrow keys up/down, ESC quits)
+alias pi-vol="ssh -t <pi-hostname> 'alsamixer -c 3'"
+
+# Set volume directly: pi-setvol 70%
+# Function — aliases can't pass $1 through single-quoted SSH
+pi-setvol() { ssh <pi-hostname> "amixer -c 3 sset Speaker $1"; }
+
+# ── Jarvis Pi: Housekeeping ────────────────────────────────────────────────
+# Clean up temp WAVs (accumulate in /tmp/jarvis/)
+alias pi-clean="ssh <pi-hostname> 'rm -f /tmp/jarvis/*.wav && echo cleaned'"
+
+# Truncate logs (appended indefinitely — rotate occasionally)
+alias pi-cleanlogs="ssh <pi-hostname> '> <project-root>/logs/voice-client.log; > <project-root>/logs/voice-client.err; > <project-root>/logs/playback.log; > <project-root>/logs/playback.err; echo logs cleared'"
