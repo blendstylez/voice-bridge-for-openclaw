@@ -12,42 +12,42 @@
 # prefer different names or want to run multiple Pis.
 
 # ── Jarvis Pi: Logs ────────────────────────────────────────────────────────
-# Voice-Client live: Wake, Recording, Upload, Cooldown
+# Voice client live: wake, recording, upload, cooldown
 alias pi-log="ssh <pi-hostname> 'tail -n 100 -f <project-root>/logs/voice-client.log'"
 
-# Playback-Server live: wann kommt die Antwort an
+# Playback server live: when the reply arrives
 alias pi-play-log="ssh <pi-hostname> 'tail -n 50 -f <project-root>/logs/playback.log'"
 
-# Beide gleichzeitig (==> Dateiname <== als Trennlinie)
+# Both at once (==> filename <== as separator)
 alias pi-logs="ssh <pi-hostname> 'tail -n 50 -f <project-root>/logs/voice-client.log <project-root>/logs/playback.log'"
 
-# Nur echte Fehler — ALSA-Rauschen rausgefiltert
+# Real errors only — ALSA noise filtered out
 alias pi-errors="ssh <pi-hostname> \"grep -v 'ALSA\|jack\|Cannot connect\|JackShm\|DiscoverDevice\|GPU device\|drm\|sys/class' <project-root>/logs/voice-client.err | tail -30\""
 
-# ── Jarvis Pi: Status & Kontrolle ─────────────────────────────────────────
-# Status beider Services
+# ── Jarvis Pi: Status & Control ──────────────────────────────────────────
+# Status of both services
 alias pi-status="ssh <pi-hostname> 'systemctl --user status jarvis-playback.service jarvis-voice-client.service --no-pager'"
 
-# Health-Check vom MBP aus
+# Health check from the MBP
 alias pi-health="curl -s http://<pi-lan-ip>:18780/health | python3 -m json.tool"
 
-# Voice-Client neu starten (nach Code- oder .env-Änderung)
+# Restart voice client (after code or .env change)
 alias pi-restart="ssh <pi-hostname> 'systemctl --user restart jarvis-voice-client.service && echo restarted'"
 
-# Beide Services neu starten
+# Restart both services
 alias pi-restart-all="ssh <pi-hostname> 'systemctl --user restart jarvis-playback.service jarvis-voice-client.service && echo both restarted'"
 
 # ── Jarvis Pi: Audio ───────────────────────────────────────────────────────
-# Lautstärke interaktiv (Pfeiltasten hoch/runter, ESC beenden)
+# Interactive volume control (arrow keys up/down, ESC quits)
 alias pi-vol="ssh -t <pi-hostname> 'alsamixer -c 3'"
 
-# Lautstärke direkt setzen: pi-setvol 70%
-# Als Funktion — alias kann $1 nicht durch Single-Quotes durchreichen
+# Set volume directly: pi-setvol 70%
+# Function — aliases can't pass $1 through single-quoted SSH
 pi-setvol() { ssh <pi-hostname> "amixer -c 3 sset Speaker $1"; }
 
 # ── Jarvis Pi: Housekeeping ────────────────────────────────────────────────
-# Temp-WAVs aufräumen (akkumulieren in /tmp/jarvis/)
+# Clean up temp WAVs (accumulate in /tmp/jarvis/)
 alias pi-clean="ssh <pi-hostname> 'rm -f /tmp/jarvis/*.wav && echo cleaned'"
 
-# Logs leeren (werden endlos angehängt — gelegentlich rotieren)
+# Truncate logs (appended indefinitely — rotate occasionally)
 alias pi-cleanlogs="ssh <pi-hostname> '> <project-root>/logs/voice-client.log; > <project-root>/logs/voice-client.err; > <project-root>/logs/playback.log; > <project-root>/logs/playback.err; echo logs cleared'"
