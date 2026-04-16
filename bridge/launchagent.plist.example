@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This is a TEMPLATE. Before using:
+1. Replace <project-root> with your actual path
+2. Copy to ~/Library/LaunchAgents/ai.openclaw.voice-bridge.plist
+3. launchctl load ~/Library/LaunchAgents/ai.openclaw.voice-bridge.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ai.openclaw.voice-bridge</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string><project-root>/.venv/bin/python3</string>
+        <string><project-root>/voice_bridge.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string><project-root></string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string><project-root>/logs/voice_bridge.log</string>
+
+    <key>StandardErrorPath</key>
+    <string><project-root>/logs/voice_bridge.log</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>
