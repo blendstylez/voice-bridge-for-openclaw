@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Template LaunchAgent plist for the Jarvis voice client services on macOS.
+  Before using:
+  1. Replace <project-root> with your actual path (e.g. /Users/<you>/jarvis-voice)
+  2. Copy to ~/Library/LaunchAgents/com.jarvis.voice-client.plist
+     (duplicate and adjust for com.jarvis.playback-server.plist)
+  3. launchctl load ~/Library/LaunchAgents/com.jarvis.voice-client.plist
+  4. launchctl start com.jarvis.voice-client
+
+  For the playback server: duplicate this file, change Label, ProgramArguments
+  to point at playback_server.py, and adjust log paths accordingly.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jarvis.voice-client</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string><project-root>/venv/bin/python3</string>
+        <string><project-root>/voice_client.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string><project-root></string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/jarvis/voice_client.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/jarvis/voice_client.err</string>
+</dict>
+</plist>

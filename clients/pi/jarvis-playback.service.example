@@ -1,0 +1,24 @@
+# Template systemd user service file.
+# Before using:
+# 1. Replace <project-root> with your path (typically /home/<user>/jarvis-voice)
+# 2. Copy to ~/.config/systemd/user/jarvis-playback.service
+# 3. systemctl --user daemon-reload
+# 4. systemctl --user enable --now jarvis-playback.service
+
+[Unit]
+Description=Jarvis Playback Server (Pi)
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=<project-root>
+EnvironmentFile=<project-root>/.env
+ExecStart=<project-root>/venv/bin/python3 <project-root>/playback_server.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:<project-root>/logs/playback.log
+StandardError=append:<project-root>/logs/playback.err
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,25 @@
+# Template systemd user service file.
+# Before using:
+# 1. Replace <project-root> with your path (typically /home/<user>/jarvis-voice)
+# 2. Copy to ~/.config/systemd/user/jarvis-voice-client.service
+# 3. systemctl --user daemon-reload
+# 4. systemctl --user enable --now jarvis-voice-client.service
+
+[Unit]
+Description=Jarvis Voice Client (Pi)
+After=network-online.target sound.target jarvis-playback.service
+Wants=network-online.target
+
+[Service]
+Environment=PYTHONUNBUFFERED=1
+Type=simple
+WorkingDirectory=<project-root>
+EnvironmentFile=<project-root>/.env
+ExecStart=<project-root>/venv/bin/python3 <project-root>/voice_client.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:<project-root>/logs/voice-client.log
+StandardError=append:<project-root>/logs/voice-client.err
+
+[Install]
+WantedBy=default.target
